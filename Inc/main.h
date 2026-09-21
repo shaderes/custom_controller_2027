@@ -45,24 +45,24 @@ typedef __packed struct
   uint8_t  crc8;
 } frame_header_t;
 
-typedef __packed struct
+typedef __packed struct 
 {
-  uint8_t  up : 1;
-  uint8_t  down : 1;
-  uint8_t  left : 1;
-	uint8_t  right : 1;
-	uint8_t  k1 : 1;
-	uint8_t  k2 : 1;
-	uint8_t  k3 : 1;
-	uint8_t  k4 : 1;
-	uint8_t  k5 : 1;
-	uint8_t  k6 : 1;
-	uint8_t  k7 : 1;
-	uint8_t  k8 : 1;
-	uint8_t  k9 : 1;
-	uint8_t  k10 : 1;
-	uint8_t  k11 : 1;
-	uint8_t  k12 : 1;
+  uint8_t k0 : 1;
+  uint8_t k1 : 1;
+  uint8_t k2 : 1;
+  uint8_t k3 : 1;
+  uint8_t k4 : 1;
+  uint8_t k5 : 1;
+  uint8_t k6 : 1;
+  uint8_t k7 : 1;
+  uint8_t k8 : 1;
+  uint8_t k9 : 1;
+  uint8_t k10 : 1;
+  uint8_t k11 : 1;
+  uint8_t k12 : 1;
+  uint8_t k13 : 1;
+  uint8_t k14 : 1;
+  uint8_t k15 : 1;
 } key_t;
 
 typedef __packed struct
@@ -71,7 +71,8 @@ typedef __packed struct
 	uint16_t cmd_id;
 	key_t key;
 	float joint_angle[6];
-	uint32_t uint32_data;
+  float grip_angle;
+	uint16_t uint16_data;
 	uint16_t crc16;
 } data_t;
 

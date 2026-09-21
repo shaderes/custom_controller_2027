@@ -55,7 +55,7 @@ virtualFolder:
           folders: []
     - name: boards
       files:
-        - path: ../bsp/boards/bsp_can.c
+        - path: ../bsp/bsp_can.c
       folders: []
     - name: applications
       files: []
@@ -79,6 +79,8 @@ virtualFolder:
         - path: ../components/algorithm/matrix.h
         - path: ../components/algorithm/pid.c
         - path: ../components/algorithm/pid.h
+        - path: ../components/support/CRC8_CRC16.c
+        - path: ../components/support/CRC8_CRC16.h
       folders: []
 dependenceList: []
 outDir: build
@@ -99,7 +101,7 @@ targets:
         - ../Drivers/CMSIS/Device/ST/STM32F4xx/Include
         - ../Drivers/CMSIS/Include
         - ../application
-        - ../bsp/boards
+        - ../bsp
         - .cmsis/include
         - RTE/_can
         - ../components/modules

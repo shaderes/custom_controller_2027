@@ -33,6 +33,8 @@
 #include "gravity_comp.h"
 #include "ZDT/ZDT_X42_V2.h"
 #include "arm_param.h"
+#include "CRC8_CRC16.h"
+#include "string.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -54,12 +56,15 @@
 
 /* USER CODE BEGIN PV */
 static uint32_t zdt_poll_tick = 0;   /* 读取张大头电机角度的轮询计时 */
+
+data_t data;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
+void Data_init(data_t *data_init);
+void send_data(data_t *data_s);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -103,6 +108,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
     can_filter_init();
     MX_TIM2_Init();
+    Data_init(&data);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -118,8 +124,11 @@ int main(void)
       zdt_poll_tick = HAL_GetTick();
       can_zdt_read_position_all();
       for (uint8_t i = 0; i < 6; i++)
+      {
+        data.joint_angle[i] = MotorCurrents[i].rad;
         arm_param.arm_theta[i] = MotorCurrents[i].rad;
-      
+      }
+
       gravity_compensation(arm_param.arm_theta, arm_param.joint_torque);
 
       for (uint8_t i = 0; i < 6; i++)
@@ -127,6 +136,8 @@ int main(void)
         arm_param.joint_current[i] = arm_param.joint_torque[i] / 0.22f;
         ZDT_X42_V2_Torque_Control(i + 1, (arm_param.joint_torque[i] < 0), 100, arm_param.joint_current[i], false);
       }
+
+      send_data(&data);
     }
   }
   /* USER CODE END 3 */
@@ -175,6 +186,37 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void Data_init(data_t *data_init)
+{
+	data_init->header.sof = 0xa5;
+	data_init->header.data_length = 30;
+	data_init->header.seq = 0;
+	data_init->header.crc8 = 0;
+	data_init->cmd_id = 0x0302;
+}
+
+void send_data(data_t *data_s)
+{
+	static unsigned char CliendTxBuffer[50];
+
+	memcpy(CliendTxBuffer, &data_s->header, sizeof(frame_header_t));//写入帧头数据
+  append_CRC8_check_sum(CliendTxBuffer,sizeof(frame_header_t)); //写入帧头校验
+
+	
+//	算好CliendTxBuffer的长度，以方便串口整包发送CliendTxBuffer
+	
+		memcpy(	
+			CliendTxBuffer + 5, 
+			(uint8_t*)&data_s->cmd_id, 
+			sizeof(data_t)-sizeof(frame_header_t)				//数据部分和cmd_id占用12字节
+		  );
+	
+  append_CRC16_check_sum(CliendTxBuffer,sizeof(data_t));
+
+	
+	HAL_UART_Transmit_DMA(&huart6,CliendTxBuffer,sizeof(data_t));
+}
 
 /* USER CODE END 4 */
 
