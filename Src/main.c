@@ -35,6 +35,7 @@
 #include "arm_param.h"
 #include "CRC8_CRC16.h"
 #include "string.h"
+#include "mit.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -44,7 +45,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -55,9 +55,12 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-static uint32_t zdt_poll_tick = 0;   /* 读取张大头电机角度的轮询计时 */
+static uint32_t last_tick = 0;   
 
 data_t data;
+
+mit_t zdt_mit[3];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -69,6 +72,7 @@ void send_data(data_t *data_s);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
 
 /* USER CODE END 0 */
 
@@ -85,7 +89,7 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-  //a
+  
 
   /* USER CODE BEGIN Init */
 
@@ -106,9 +110,13 @@ int main(void)
   MX_TIM2_Init();
   MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
-    can_filter_init();
-    MX_TIM2_Init();
-    Data_init(&data);
+  can_filter_init();
+  MX_TIM2_Init();
+  Data_init(&data);
+  mit_init(zdt_mit, ZDT_40MM_MIT_KP, ZDT_40MM_MIT_KD);
+  mit_init(zdt_mit + 1, ZDT_23MM_MIT_KP, ZDT_23MM_MIT_KD);
+  mit_init(zdt_mit + 1, ZDT_23MM_MIT_KP, ZDT_23MM_MIT_KD);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -119,22 +127,36 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    if ((HAL_GetTick() - zdt_poll_tick) >= 20)
+    if ((HAL_GetTick() - last_tick) >= 20)
     {
-      zdt_poll_tick = HAL_GetTick();
+      last_tick = HAL_GetTick();
       can_zdt_read_position_all();
+      can_zdt_read_speed_all();
+
       for (uint8_t i = 0; i < 6; i++)
       {
-        data.joint_angle[i] = MotorCurrents[i].rad;
-        arm_param.arm_theta[i] = MotorCurrents[i].rad;
+        data.joint_angle[i] = theta[i];
+        arm_param.arm_theta[i] = theta[i];
+        zdt_mit[i].ref_angle = theta[i];
+        arm_param.joint_speed[i + ZDT_JOINT_OFFSET] = MotorCurrents[i].dq; 
+        zdt_mit[i].ref_speed = MotorCurrents[i].dq;
       }
 
       gravity_compensation(arm_param.arm_theta, arm_param.joint_torque);
 
-      for (uint8_t i = 0; i < 6; i++)
+			for (uint8_t i = 0; i < ZDT_MOTOR_ONLINE; i++)
       {
-        arm_param.joint_current[i] = arm_param.joint_torque[i] / 0.22f;
-        ZDT_X42_V2_Torque_Control(i + 1, (arm_param.joint_torque[i] < 0), 100, arm_param.joint_current[i], false);
+        mit_calc(zdt_mit + i, zdt_angle_target[i], zdt_speed_target[i], 0.01);
+
+        float curr = zdt_mit->torque / zdt_torque_const[i] * 1000.0f;
+
+        if (curr > ZDT_TORQUE_MAX_MA)  curr = ZDT_TORQUE_MAX_MA;
+        if (curr < -ZDT_TORQUE_MAX_MA) curr = -ZDT_TORQUE_MAX_MA;
+
+        /* 电机 i+1 → 关节下标 i + ZDT_JOINT_OFFSET（和上面的角度/速度映射一致） */
+        arm_param.joint_current[i + ZDT_JOINT_OFFSET] = curr;
+        ZDT_X42_V2_Torque_Control(i + 1, (curr < 0), ZDT_TORQUE_RAMP_MA_S,
+                                  (uint16_t)((curr < 0) ? -curr : curr), false);
       }
 
       send_data(&data);

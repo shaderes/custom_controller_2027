@@ -1,6 +1,5 @@
-can\bsp_can.o: ..\bsp\boards\bsp_can.c
-can\bsp_can.o: ..\bsp\boards\bsp_can.h
-can\bsp_can.o: ..\application\struct_typedef.h
+can\bsp_can.o: ..\bsp\bsp_can.c
+can\bsp_can.o: ..\bsp\bsp_can.h
 can\bsp_can.o: ../Inc/main.h
 can\bsp_can.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 can\bsp_can.o: ../Inc/stm32f4xx_hal_conf.h
@@ -31,3 +30,9 @@ can\bsp_can.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h
 can\bsp_can.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc.h
 can\bsp_can.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h
 can\bsp_can.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h
+can\bsp_can.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
+can\bsp_can.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
+can\bsp_can.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
+can\bsp_can.o: ../components/modules/ZDT/ZDT_X42_V2.h
+can\bsp_can.o: D:\keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+can\bsp_can.o: D:\keil_v5\ARM\ARMCC\Bin\..\include\string.h

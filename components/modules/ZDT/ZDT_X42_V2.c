@@ -10,7 +10,10 @@
 *** qq交流群：262438510
 **********************************************************/
 
-/* 电机数据本体：下标 = 电机地址 - 1，由 bsp_can.c 的 CAN 接收中断刷新 */
+float zdt_torque_const[3] = {ZDT_40MM_TORQUE_CONST, ZDT_23MM_TORQUE_CONST, ZDT_23MM_TORQUE_CONST};
+float zdt_speed_target[3] = {ZDT_40MM_MIT_SET_SPEED, ZDT_23MM_MIT_SET_SPEED, ZDT_23MM_MIT_SET_SPEED};
+float zdt_angle_target[3] = {ZDT_40MM_MIT_SET_ANGLE, ZDT_23MM_MIT_SET_ANGLE, ZDT_23MM_MIT_SET_ANGLE};
+
 MotorCurrentInfo_t MotorCurrents[ZDT_MOTOR_NUM];
 /* 关节角度：单位 rad，由 Get_theta() 根据电机角度换算得到 */
 float theta[6];

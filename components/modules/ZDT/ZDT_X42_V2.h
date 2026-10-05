@@ -15,6 +15,23 @@
 
 #define		ABS(x)		((x) > 0 ? (x) : -(x)) 
 
+#define ZDT_TORQUE_MAX_MA    4000.0f
+
+#define ZDT_TORQUE_RAMP_MA_S 30000
+
+#define ZDT_40MM_TORQUE_CONST 0.22f
+#define ZDT_23MM_TORQUE_CONST 0.12f
+
+#define ZDT_40MM_MIT_KP 0.0f
+#define ZDT_40MM_MIT_KD 0.0f
+#define ZDT_40MM_MIT_SET_ANGLE 0.0f
+#define ZDT_40MM_MIT_SET_SPEED 0.0f
+
+#define ZDT_23MM_MIT_KP 0.0f
+#define ZDT_23MM_MIT_KD 0.0f
+#define ZDT_23MM_MIT_SET_ANGLE 0.0f
+#define ZDT_23MM_MIT_SET_SPEED 0.0f
+
 typedef enum {
   S_VER   = 0,      /* 读取固件版本和对应的硬件版本 */
   S_RL    = 1,      /* 读取读取相电阻和相电感 */
@@ -60,6 +77,10 @@ typedef struct {
 extern MotorCurrentInfo_t MotorCurrents[ZDT_MOTOR_NUM];
 /* 关节角度：单位 rad，由 Get_theta() 根据电机角度换算得到 */
 extern float theta[6];
+
+extern float zdt_torque_const[3];
+extern float zdt_speed_target[3];
+extern float zdt_angle_target[3];
 /* 用 MotorCurrents[index] 的电机角度刷新关节角 theta[index]（index = 电机地址 - 1） */
 void Get_theta(const MotorCurrentInfo_t *motor_currents, uint8_t index);
 

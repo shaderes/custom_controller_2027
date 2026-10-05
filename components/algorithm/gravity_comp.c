@@ -11,7 +11,13 @@ uint8_t gravity_compensation(float theta[6], float torque[6])
     float p[6][3];//关节坐标
     float z[6][3];//z轴单位向量
     float cv[6][3];//质心坐标
-    
+
+    /* 每次调用必须先把输出清零：
+       调用方传进来的是 arm_param.joint_torque（不是每轮清零的临时变量），
+       下面又是 torque[i] += ...，不清零的话每 20ms 就往上累加一次，
+       几秒钟力矩就滚到溢出，电机上会看到力矩单调发散。 */
+    for (uint8_t i = 0; i < 6; i++) torque[i] = 0.0f;
+
     for (int i = 5; i >= 0; i--)
     {
         forward_kinematics(theta, i, T[i]);

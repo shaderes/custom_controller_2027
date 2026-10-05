@@ -58,11 +58,15 @@ void vec_mul31(float a[3], float b, float c[3])
     c[2] = a[2] * b;
 }
 
+/* 用 4x4 齐次变换矩阵（行主序，平移在 T[3]/T[7]/T[11]）变换一个点：P_out = R*P_in + t
+   原实现是 P_out[0] = P_in[0]*T[0] + P_in[0]*T[4] + P_in[0]*T[8] + T[3] 这种写法，
+   每行的三个乘积项都只用了 P_in[0]/P_in[1]/P_in[2] 里的同一个分量、且行列出错，
+   只要质心不在原点就算错（link_center 全 0 时看不出来）。 */
 void transform_point(float T[16], float P_in[3], float P_out[3])
 {
-    P_out[0] = P_in[0] * T[0] + P_in[0] * T[4] + P_in[0] * T[8] + T[3];
-    P_out[1] = P_in[1] * T[1] + P_in[1] * T[5] + P_in[1] * T[9] + T[7];
-    P_out[2] = P_in[2] * T[2] + P_in[2] * T[6] + P_in[2] * T[10] + T[11];
+    P_out[0] = T[0] * P_in[0] + T[1] * P_in[1] + T[2]  * P_in[2] + T[3];
+    P_out[1] = T[4] * P_in[0] + T[5] * P_in[1] + T[6]  * P_in[2] + T[7];
+    P_out[2] = T[8] * P_in[0] + T[9] * P_in[1] + T[10] * P_in[2] + T[11];
 }
 
 

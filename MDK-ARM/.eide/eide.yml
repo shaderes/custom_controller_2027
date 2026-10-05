@@ -81,6 +81,8 @@ virtualFolder:
         - path: ../components/algorithm/pid.h
         - path: ../components/support/CRC8_CRC16.c
         - path: ../components/support/CRC8_CRC16.h
+        - path: ../components/algorithm/mit.c
+        - path: ../components/algorithm/mit.h
       folders: []
 dependenceList: []
 outDir: build
